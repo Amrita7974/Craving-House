@@ -41,6 +41,7 @@ const Register = () => {
               className="w-64 md:w-96 rounded-3xl shadow-lg"
             />
           </div>
+          
 
           <div className="w-full md:w-auto bg-(--background) rounded-3xl shadow p-6 md:p-10 mt-5 md:mt-0 self-start">
             <div className="var(text-2xl) font-bold mb-1 text-(--success) flex justify-center items-center text-3xl">
