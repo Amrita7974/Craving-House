@@ -1,21 +1,18 @@
 import React, { useState } from "react";
 import deliveryboy from "../assets/deliveryboy.png";
-
+import api from "../config/api.config.js";
 const Register = () => {
   const [registerData, setRegisterData] = useState({
-    fullname: "",
+    fullName: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
+    accountType: "customer",
   });
 
-  const [validateError, setValidateError] = useState();
-
   const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-
+    const { name, value } = e.target;
     setRegisterData((prevData) => ({ ...prevData, [name]: value }));
   };
 
@@ -23,149 +20,151 @@ const Register = () => {
     e.preventDefault();
 
     console.log("Register data submitted:", registerData);
-
     const payload = {
-      fullname: registerData.name.toLowerCase(),
+      fullName: registerData.fullName.trim(),
+      email: registerData.email.toLowerCase(),
+      phone: registerData.phone,
       password: registerData.password,
+      gender: registerData.gender,
+      dob: registerData.dob,
     };
+    try {
+      const res = await api.post("/auth/register", payload);
+      alert(res.data.message);
+    } catch (error) {
+      console.log(res?.data?.message || error.message);
+    }
+
+    try {
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    // console.log("Payload:", payload);
   };
 
   return (
-    <>
-      <div className="h-fit bg-cover bg-center bg-[url('/foodTable.webp')]">
-        <div className="h-[92vh] grid grid-cols-1 md:grid-cols-2 p-10 items-start">
-          <div className="flex justify-center md:justify-start items-start mt-6 md:mt-0">
-            <img
-              src={deliveryboy}
-              alt="delivery"
-              className="w-64 md:w-96 rounded-3xl shadow-lg"
-            />
-          </div>
+    <div className="min-h-screen bg-cover bg-center bg-[url('/foodTable.webp')]">
+      <div className="min-h-screen bg-linear-to-br from-black/70 via-black/55 to-orange-500/20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-2 md:px-8 md:py-12 lg:px-10">
+          <div
+            className="rounded
           
-
-          <div className="w-full md:w-auto bg-(--background) rounded-3xl shadow p-6 md:p-10 mt-5 md:mt-0 self-start">
-            <div className="var(text-2xl) font-bold mb-1 text-(--success) flex justify-center items-center text-3xl">
-              Create Account
+          -4xl border border-white/20 bg-white/90 p-6 shadow-2xl backdrop-blur md:p-8 lg:p-10"
+          >
+            <div className="text-center">
+              <div className="mb-3 inline-flex rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-600">
+                Join Cravings
+              </div>
+              <h2 className="text-3xl font-black text-(--accent)">
+                Create Account
+              </h2>
             </div>
-            <span className="block text-center">
-              Join us as a Customer, Restaurant, or Rider
-            </span>
-            <div>
-              <span>Register as:</span>
-              <div className="flex gap-2 mt-2">
-                <input
-                  type="radio"
-                  name="registerAs"
-                  value="customer"
-                  id="customer"
-                />
 
-                <label htmlFor="customer" className="mr-10">
-                  Customer
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <input
+                type="text"
+                id="fullname"
+                name="fullName"
+                value={registerData.fullName}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Enter your full name"
+              />
+
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={registerData.email}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Enter your email"
+              />
+
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={registerData.phone}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Enter your phone number"
+              />
+
+              <select
+                name="gender"
+                value={registerData.gender}
+                onChange={handleChange}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="other">other</option>
+              </select>
+
+              <input
+                type="date"
+                name="dob"
+                value={registerData.dob}
+                onChange={handleChange}
+              />
+
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={registerData.password}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Enter your password"
+              />
+
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={registerData.confirmPassword}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Confirm your password"
+              />
+
+              <div className="flex items-center text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <label htmlFor="terms" className="ml-2">
+                  I agree to the
+                  <span className="ml-1 font-semibold text-orange-500 hover:underline">
+                    terms and conditions.
+                  </span>
                 </label>
-                <input
-                  type="radio"
-                  id="restaurant"
-                  value="restaurant"
-                  name="registerAs"
-                />
-                <label htmlFor="restaurant" className="mr-10">
-                  Restaurant
-                </label>
-                <input type="radio" id="rider" name="registerAs" />
-                <label htmlFor="rider">Rider</label>
-              </div>
-            </div>
-            <form onSubmit={handleSubmit} className="mt-4">
-              <div className="flex flex-col gap-2">
-                <input
-                  type="fullname"
-                  id="fullname"
-                  name="fullname"
-                  value={registerData.fullname}
-                  onChange={handleChange}
-                  className="my-5 border p-2 rounded focus:outline-none focus:ring-2 focus:ring-(--accent)"
-                  placeholder="Enter your full name"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={registerData.email}
-                  onChange={handleChange}
-                  className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-(--accent)"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="phone"
-                  id="phone"
-                  name="phone"
-                  value={registerData.phone}
-                  onChange={handleChange}
-                  className="my-5 border p-2 rounded focus:outline-none focus:ring-2 focus:ring-(--accent)"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={registerData.password}
-                  onChange={handleChange}
-                  className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-(--accent)"
-                  placeholder="Enter your password"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="confirmPassword"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={registerData.confirmPassword}
-                  onChange={handleChange}
-                  className="my-5 border p-2 rounded focus:outline-none focus:ring-2 focus:ring-(--accent)"
-                  placeholder="Confirm your password"
-                />
-              </div>
-
-              <div className=" flex justify-between items-center text-sm">
-                <div className="flex items-center">
-                  <input type="checkbox" id="terms" />
-                  <label htmlFor="terms" className="ms-1">
-                    I agree to the
-                    <span className="ms-1 hover:underline text-(--accent)">
-                      terms and conditions.
-                    </span>
-                  </label>
-                </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full mt-6 bg-(--accent) text-(--primary-text) py-3 px-4 rounded hover:bg-(--accent) transition"
+                className="w-full rounded-xl bg-orange-500 px-4 py-3 font-semibold text-white transition hover:bg-orange-600"
               >
                 Register
               </button>
-              <div className="my-4 flex justify-center">
+
+              <div className="pt-2 text-center text-sm text-gray-600">
                 <span>Already registered?</span>
-                <a href="./login">
-                  <span className="text-(--accent) hover:underline ml-1">
-                    Login here
-                  </span>
+                <a
+                  href="./login"
+                  className="ml-1 font-semibold text-orange-500 hover:underline"
+                >
+                  Login here
                 </a>
               </div>
             </form>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
