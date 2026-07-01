@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import deliveryboy from "../assets/deliveryboy.png";
 import api from "../config/api.config.js";
+import toast from "react-hot-toast";
+
+import { useNavigate } from "react-router-dom";
+
+
 const Register = () => {
+  const navigate = useNavigate();
   const [registerData, setRegisterData] = useState({
     fullName: "",
     email: "",
@@ -30,17 +36,25 @@ const Register = () => {
     };
     try {
       const res = await api.post("/auth/register", payload);
-      alert(res.data.message);
-    } catch (error) {
-      console.log(res?.data?.message || error.message);
-    }
 
-    try {
-    } catch (error) {
-      console.log(error.message);
-    }
+      toast.success(res.data.message);
+      console.log(res.data);
+      
 
-    // console.log("Payload:", payload);
+      // console.log(res.data);
+
+      // alert(res.data.message);
+
+      // Optional: Store user data
+      localStorage.setItem("user", JSON.stringify(res.data.data));
+
+      // Redirect after successful login
+      navigate("/");
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+      console.log(error.response.status + "|" + error?.response?.data?.message);
+    }
+  
   };
 
   return (

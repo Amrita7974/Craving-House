@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import deliveryboy from "../assets/deliveryboy.png";
+import api from "../config/api.config.js";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+
 
 const Login = () => {
+  const {setUser,setIsLogin} = useAuth();
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -27,7 +34,32 @@ const Login = () => {
       email: loginData.email.toLowerCase(),
       password: loginData.password,
     };
+
+     try {
+      const res = await api.post("/auth/login", payload);
+
+      toast.success(res.data.message);
+      console.log(res.data);
+      
+
+      // console.log(res.data);
+
+      // alert(res.data.message);
+
+      // Optional: Store user data
+      localStorage.setItem("user", JSON.stringify(res.data.data));
+      setUser(res.data.data);
+      setIsLogin(true);
+
+      // Redirect after successful login
+      navigate("/user/dashboard");
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+      console.log(error.response.status + "|" + error?.response?.data?.message);
+    }
+  
   };
+  
 
   return (
     <>
