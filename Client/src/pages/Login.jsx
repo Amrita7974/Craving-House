@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 
 const Login = () => {
-  const {setUser,setIsLogin} = useAuth();
+  const {setUser,setIsLogin,isLogin} = useAuth();
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: "",
@@ -35,35 +35,28 @@ const Login = () => {
       password: loginData.password,
     };
 
-     try {
+    
+    try {
       const res = await api.post("/auth/login", payload);
-
       toast.success(res.data.message);
-      console.log(res.data);
-      
-
-      // console.log(res.data);
-
-      // alert(res.data.message);
-
-      // Optional: Store user data
-      localStorage.setItem("user", JSON.stringify(res.data.data));
+      sessionStorage.setItem("UserData", JSON.stringify(res.data.data));
       setUser(res.data.data);
-      setIsLogin(true);
-
-      // Redirect after successful login
+      // setIsLogin(true);
       navigate("/user/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.message);
-      console.log(error.response.status + "|" + error?.response?.data?.message);
+      toast.error(
+        error.response.status + " | " + error.response?.data?.message ||
+          error.message,
+      );
     }
-  
   };
-  
+
+  const inputClass =
+    "border p-2 rounded focus:outline-none focus:ring-2 focus:ring-(--accent)";
 
   return (
     <>
-      <div className="h-[90vh] bg-linear-to-r from-(--secondary) to-(--primary) grid grid-cols-2 p-10 ">
+       <div className="h-[90vh] bg-linear-to-r from-(--secondary) to-(--primary) grid grid-cols-2 p-10 ">
         <div className="hidden md:block">
           <img src={deliveryboy} alt="" className="rotate-y-180" />
         </div>
