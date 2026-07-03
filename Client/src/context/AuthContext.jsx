@@ -7,7 +7,7 @@ const AuthContext = React.createContext();
 
      JSON.parse(sessionStorage.getItem("UserData")) || "",
  );
-    const [isLogin,setIsLogin] = useState(false);
+    const [isLogin,setIsLogin] = useState(!!user);
 
     useEffect(()=>  {
         if(user){
