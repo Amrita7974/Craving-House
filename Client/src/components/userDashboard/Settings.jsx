@@ -2,20 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../config/api.config.js";
 import toast from "react-hot-toast";
-import { MdOutlineAddAPhoto } from "react-icons/md"; // Added camera icon
+import { MdOutlineAddAPhoto } from "react-icons/md";
 
 const Settings = () => {
   const { user, setUser } = useAuth();
 
   const [isEditable, setIsEditable] = useState(false);
   const [tempUser, setTempUser] = useState(user);
-  
-  // File upload state for photo logic
+  const [isLoading, setIsLoading] = useState(false); // Added missing loading state
   
   const [selectedFile, setSelectedFile] = useState(null);
   const [profilePicPreview, setProfilePicPreview] = useState(null);
 
-  // Sync state if user context updates externally
   useEffect(() => {
     if (user) {
       setTempUser(user);
@@ -27,7 +25,6 @@ const Settings = () => {
     setTempUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Profile picture selection & preview logic
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -39,41 +36,45 @@ const Settings = () => {
 
   const handleCancel = () => {
     setIsEditable(false);
-    setTempUser(user); // Reset text inputs
-    setProfilePicPreview(null); // Clear preview image
-    setSelectedFile(null); // Clear pending file
+    setTempUser(user); 
+    setProfilePicPreview(null); 
+    setSelectedFile(null); 
   };
 
   const handleSave = async () => {
-    setIsEditable(false);
-
-    // 1. Prepare text data payload
-    const payLoad = {
-      email: tempUser.email.toLowerCase(),
-      fullName: tempUser.fullName,
-      phone: tempUser.phone,
-    };
-
     try {
-      // NOTE: If your backend expects a single multipart/form-data request to update 
-      // both text and files, you will need to append these values to a FormData instance instead.
+      setIsLoading(true);
+
+      // Convert your payload to FormData to allow file uploading
+      const payLoad = new FormData();
+      payLoad.append("fullName", tempUser.fullName || "");
+      payLoad.append("email", (tempUser.email || "").toLowerCase());
+      payLoad.append("phone", tempUser.phone || "");
+
+      // Append file if a new one was selected
       if (selectedFile) {
-        // Option A: If your backend handles images on an independent route
-        // const formData = new FormData();
-        // formData.append("photo", selectedFile);
-        // const imageRes = await api.put("/user/edit-avatar", formData);
-        // payLoad.photo = imageRes.data.data.photo;
+        // Double check if your backend expects "displayPic" or "photo"
+        payLoad.append("displayPic", selectedFile); 
       }
 
-      const res = await api.put("/user/edit-profile", payLoad);
+      const res = await api.put("/user/edit-profile", payLoad, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       setUser(res.data.data);
+      // Optional: update session storage if you are tracking user persistence there
+      sessionStorage.setItem("cravingUser", JSON.stringify(res.data.data));
+      
       toast.success(res.data.message || "Profile updated successfully!");
+      setIsEditable(false);
     } catch (error) {
       toast.error(
         error.response?.data?.message || error.message || "An error occurred"
       );
     } finally {
-      // Cleanup preview tracking memory
+      setIsLoading(false);
       setProfilePicPreview(null);
       setSelectedFile(null);
     }
@@ -83,33 +84,36 @@ const Settings = () => {
     <div className="max-w-3xl mx-auto mt-10 bg-white shadow-xl rounded-2xl p-8 ">
       <div className="flex flex-col md:flex-row items-center gap-8">
         
-        {/* Profile Picture Container with Camera Button */}
+        {/* Profile Picture Container */}
         <div className="relative w-32 h-32">
           <div className="w-full h-full rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">
             <img
-              src={profilePicPreview || user?.photo || "https://via.placeholder.com/150"}
+              // Note: fall back to your correct object structure (e.g., user?.photo?.url)
+              src={profilePicPreview || user?.photo?.url || user?.photo || "https://via.placeholder.com/150"}
               alt="Profile"
               className="w-full h-full object-cover"
             />
           </div>
 
-          {/* Camera Upload Overlay Button */}
-          <div
-            className="absolute cursor-pointer bottom-0 right-0 border-2 border-white p-2 rounded-full w-fit bg-gray-100 hover:bg-gray-200 shadow-md transition"
-            title="Change Photo"
-          >
-            <label htmlFor="profilePic" className="cursor-pointer">
-              <MdOutlineAddAPhoto className="text-xl text-gray-700" />
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              name="profilePic"
-              id="profilePic"
-              className="hidden"
-              onChange={handleProfilePicChange}
-            />
-          </div>
+          {/* Camera Overlay Button - Only responsive when editable */}
+          {isEditable && (
+            <div
+              className="absolute cursor-pointer bottom-0 right-0 border-2 border-white p-2 rounded-full w-fit bg-gray-100 hover:bg-gray-200 shadow-md transition"
+              title="Change Photo"
+            >
+              <label htmlFor="profilePic" className="cursor-pointer">
+                <MdOutlineAddAPhoto className="text-xl text-gray-700" />
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                name="profilePic"
+                id="profilePic"
+                className="hidden"
+                onChange={handleProfilePicChange}
+              />
+            </div>
+          )}
         </div>
 
         {/* User Details */}
@@ -121,8 +125,9 @@ const Settings = () => {
                 <input
                   type="text"
                   name="fullName"
-                  value={tempUser.fullName || ""}
+                  value={tempUser?.fullName || ""}
                   onChange={handleChange}
+                  disabled={isLoading}
                   className="w-full mt-1 border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -132,7 +137,7 @@ const Settings = () => {
                 <input
                   type="email"
                   name="email"
-                  value={tempUser.email || ""}
+                  value={tempUser?.email || ""}
                   disabled
                   className="w-full mt-1 border rounded-lg p-3 bg-gray-100 cursor-not-allowed"
                 />
@@ -143,8 +148,9 @@ const Settings = () => {
                 <input
                   type="text" 
                   name="phone"
-                  value={tempUser.phone || ""}
+                  value={tempUser?.phone || ""}
                   onChange={handleChange}
+                  disabled={isLoading}
                   className="w-full mt-1 border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -175,16 +181,18 @@ const Settings = () => {
           <>
             <button
               onClick={handleCancel}
-              className="px-6 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+              disabled={isLoading}
+              className="px-6 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
             >
               Cancel
             </button>
 
             <button
               onClick={handleSave}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              disabled={isLoading}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
-              Save Changes
+              {isLoading ? "Saving..." : "Save Changes"}
             </button>
           </>
         ) : (
