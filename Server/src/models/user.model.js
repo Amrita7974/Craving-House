@@ -16,7 +16,7 @@ const UserSchema = mongoose.Schema(
       required: true,
     },
 
-      dob: {
+    dob: {
       type: Date,
       required: true,
     },
@@ -24,14 +24,19 @@ const UserSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    
+
     password: {
       type: String,
       required: true,
     },
     photo: {
-      type: String,
-      required: true,
+      url: {
+        type: String,
+        required: true,
+      },
+      publicId: {
+        type: String,
+      },
     },
   },
   {
