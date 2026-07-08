@@ -9,7 +9,7 @@ import {
   MdArrowForward,
 } from "react-icons/md";
 
-const Overview = ({ setActive }) => {
+const AdminOverview = ({ setActive }) => {
   const { user } = useAuth();
 
   const getGreeting = () => {
@@ -164,4 +164,4 @@ const Overview = ({ setActive }) => {
   );
 };
 
-export default Overview;
+export default AdminOverview;
