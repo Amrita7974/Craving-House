@@ -1,31 +1,22 @@
-import React, { useContext, useEffect, useState } from "react";
-const AuthContext = React.createContext();
+import React, { createContext, useState, useEffect, useContext } from "react";
 
- export const AuthProvider =  ({children}) => {
+const AuthContext = createContext();
 
-    const [user,setUser] = useState(
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(
+    JSON.parse(sessionStorage.getItem("cravingUser")) || null
+  );
+  const [isLogin, setIsLogin] = useState(!!user);
+  const [role, setRole] = useState(user ? user.userType : null);
 
-     JSON.parse(sessionStorage.getItem("UserData")) || "",
- );
-    const [isLogin,setIsLogin] = useState(!!user);
+  useEffect(() => {
+    setIsLogin(!!user);
+    setRole(user ? user.userType : null);
+  }, [user]);
 
-    useEffect(()=>  {
-        if(user){
-            setIsLogin(true);
-        }else{
-            setIsLogin(false);
-        }
+  const value = { user, isLogin, role, setUser, setIsLogin, setRole };
 
-    }, [user]);
-
-    const value = {
-        user ,
-        setUser , 
-        isLogin ,
-        setIsLogin
-    }
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth =  () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);

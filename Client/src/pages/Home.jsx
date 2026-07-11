@@ -1,4 +1,4 @@
- 
+
 import { FaSearch, FaStar } from "react-icons/fa";
 import {Link} from "react-router-dom";
 import bgImage2 from "../assets/bgImage2.png"
@@ -99,7 +99,7 @@ const Home = () => {
           <img
             src={bgImage2}
             alt="Hero"
-            className="w-full h-[650px] object-cover"
+            className="w-full h- [650px] object-cover"
           />
 
           <div className="absolute inset-0 bg-black/30"></div>
@@ -135,7 +135,7 @@ const Home = () => {
 
           {/* Search Box */}
 
-          <div className="absolute bottom-[-30px] left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg flex items-center px-5 py-4 w-11/12 max-w-2xl">
+          <div className="absolute bottom- [-30px] left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg flex items-center px-5 py-4 w-11/12 max-w-2xl">
             <FaSearch className="text-gray-500 mr-3" />
 
             <input
