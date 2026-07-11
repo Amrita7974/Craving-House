@@ -39,10 +39,14 @@ const Login = () => {
     try {
       const res = await api.post("/auth/login", payload);
       toast.success(res.data.message);
-      sessionStorage.setItem("UserData", JSON.stringify(res.data.data));
+      sessionStorage.setItem("cravingUser", JSON.stringify(res.data.data));
       setUser(res.data.data);
-      // setIsLogin(true);
-      navigate("/user/dashboard");
+      const userType = res.data.data.userType;
+      const dashboardPath = userType === "customer" ? "/customer-dashboard" : 
+                           userType === "restaurant" ? "/restaurant-dashboard" :
+                           userType === "rider" ? "/rider-dashboard" :
+                           userType === "admin" ? "/admin-dashboard" : "/";
+      navigate(dashboardPath);
     } catch (error) {
       toast.error(
         error.response.status + " | " + error.response?.data?.message ||
