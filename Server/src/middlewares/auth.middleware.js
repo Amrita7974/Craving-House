@@ -20,10 +20,10 @@ export const AuthProtect = async (req, res, next) => {
       return next(error);
     }
 
-    console.log("Decode:", decode);
+    // console.log("Decode:", decode);
 
     const verifiedUser = await User.findById(decode.id);
-    console.log("VerifiedUser:", verifiedUser);
+   // console.log("VerifiedUser:", verifiedUser);
     if (!verifiedUser) {
       const error = new Error("Session Expired");
       error.statusCode = 401;
@@ -33,7 +33,7 @@ export const AuthProtect = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(error.message);
-    error.statusCode = 500;
+    // error.statusCode = 500;
     next(error);
   }
 };
