@@ -1,33 +1,40 @@
 import React from "react";
-import { MdOutlineDashboard, MdOutlineFastfood } from "react-icons/md";
-import { PiListHeartLight } from "react-icons/pi";
-import { BsPersonGear } from "react-icons/bs";
+import { MdDashboard } from "react-icons/md";
+import { FaShoppingCart } from "react-icons/fa";
+import { MdFavoriteBorder } from "react-icons/md";
+import { IoMdSettings } from "react-icons/io";
 
-const MenuItems = [
-  { name: "Overview", icon: <MdOutlineDashboard /> },
-  { name: "Order", icon: <MdOutlineFastfood /> },
-  { name: "Wishlist", icon: <PiListHeartLight /> },
-  { name: "Settings", icon: <BsPersonGear /> },
-];
+const AdminSidebar = ({ activeTab, setActiveTab }) => {
+  const mainTabs = [
+    { name: "Overview", value: "overview", icon: <MdDashboard /> },
+    { name: "Orders", value: "orders", icon: <FaShoppingCart /> },
+  ];
 
-const AdminSidebar = ({ active, setActive }) => {
+  const settingsTab = { name: "Settings", value: "settings", icon: <IoMdSettings /> };
+
+  const renderTab = (tab) => (
+    <li
+      key={tab.value}
+      className={`cursor-pointer p-2 rounded text-(--color-neutral) flex items-center gap-3 ${
+        activeTab === tab.value
+          ? "bg-(--color-primary) text-(--color-primary-content) font-semibold"
+          : "hover:bg-(--color-secondary) hover:text-(--color-secondary-content) transition-colors duration-200"
+      }`}
+      onClick={() => setActiveTab(tab.value)}
+    >
+      {tab.icon} {tab.name}
+    </li>
+  );
+
   return (
     <>
-      <div className="p-3">
-        <div className="border-b-2 text-center text-xl">User Dashboard</div>
-
-        <div className="space-y-1 p-4 mt-4">
-          {MenuItems.map((item, idx) => (
-            <button
-              key={idx}
-              className={`flex gap-3 font-semibold items-center border border-transparent hover:border-(--primary) w-full p-3 rounded-lg ${active===item.name && "bg-(--secondary) text-(--primary-text)"}`}
-              onClick={() => setActive(item.name)}
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </button>
-          ))}
-        </div>
+      <div className="h-full flex flex-col">
+        <ul className="space-y-4 flex-1">
+          {mainTabs.map((tab) => renderTab(tab))}
+        </ul>
+        <ul className="space-y-4 border-t border-(--color-secondary) py-2">
+          {renderTab(settingsTab)}
+        </ul>
       </div>
     </>
   );
