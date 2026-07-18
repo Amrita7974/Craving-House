@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root{
- --primary: #001BB7;
+  --primary: #001BB7;
   --secondary: #0046FF;
   --accent: #FF8040;
 
@@ -12,5 +12,18 @@
   --background: #F5F1DC;
   --text: #111827;
 
+  /* daisyUI color mapping support for Tailwind v4 */
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-neutral: var(--text);
+  --color-base-300: #d1d5db;
+  --color-primary-content: #ffffff;
+  --color-secondary-content: #ffffff;
+  --color-neutral-content: #ffffff;
 }
+
 
