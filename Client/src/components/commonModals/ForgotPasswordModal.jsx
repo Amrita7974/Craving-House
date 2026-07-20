@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { LuLoaderCircle } from "react-icons/lu";
-import api from "../../config/api.config.js";
+import api from "../../config/api.config";
 import toast from "react-hot-toast";
 
 const ForgotPasswordModal = ({ open, onClose }) => {
@@ -18,43 +18,68 @@ const ForgotPasswordModal = ({ open, onClose }) => {
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   const handleCloseModal = () => {
-    onClose();
     setFormData({
       email: "",
       otp: "",
       newPassword: "",
       confirmNewPassword: "",
     });
+    // Reset flags cleanly so the next open doesn't get stuck midway
+    setIsOtpSent(false);
+    setIsOtpVerified(false);
+    onClose();
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
+
   const handleResetPassword = async () => {
+    // 1. Client-side Validation Check
+    if (isOtpSent && isOtpVerified) {
+      if (!formData.newPassword || !formData.confirmNewPassword) {
+        toast.error("Please fill out all password fields.");
+        return;
+      }
+      if (formData.newPassword !== formData.confirmNewPassword) {
+        toast.error("New password and confirm password do not match.");
+        return;
+      }
+    }
+
     try {
       setIsLoading(true);
+
+      // STEP 1: Send OTP (Executes only if OTP has not been sent yet)
       if (!isOtpSent) {
         const res = await api.post("/auth/send-otp", formData);
         toast.success(res.data.message);
         setIsOtpSent(true);
-      }
-
-      if (isOtpSent && !isOtpVerified) {
+      } 
+      
+      // STEP 2: Verify OTP (Executes only if OTP was sent, but not verified yet)
+      else if (isOtpSent && !isOtpVerified) {
+        if (!formData.otp) {
+          toast.error("Please enter the OTP code.");
+          setIsLoading(false);
+          return;
+        }
         const res = await api.post("/auth/verify-otp", formData);
         toast.success(res.data.message);
         setIsOtpVerified(true);
-      }
-      if (isOtpSent && isOtpVerified) {
+      } 
+      
+      // STEP 3: Reset Password (Executes only when OTP is verified)
+      else if (isOtpSent && isOtpVerified) {
         const res = await api.post("/auth/reset-password", formData);
         toast.success(res.data.message);
-        setIsOtpVerified(true);
         handleCloseModal();
       }
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          "Unknown error occurred during registration. Please try again.",
+          "Unknown error occurred. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -62,6 +87,7 @@ const ForgotPasswordModal = ({ open, onClose }) => {
   };
 
   if (!open) return null;
+
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-999">
@@ -75,10 +101,10 @@ const ForgotPasswordModal = ({ open, onClose }) => {
             </button>
           </header>
           <main>
-            <div className="p-4">
+            <div className="p-4 space-y-4">
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="font-semibold">
-                  Your Registred Email
+                  Your Registered Email
                 </label>
                 <input
                   type="email"
@@ -125,14 +151,11 @@ const ForgotPasswordModal = ({ open, onClose }) => {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="confirmNewPassword"
-                      className="font-semibold"
-                    >
+                    <label htmlFor="confirmNewPassword" className="font-semibold">
                       Confirm Your New Password
                     </label>
                     <input
-                      type="text"
+                      type="password" 
                       id="confirmNewPassword"
                       name="confirmNewPassword"
                       value={formData.confirmNewPassword}
