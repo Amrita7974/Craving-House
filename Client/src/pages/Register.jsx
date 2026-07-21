@@ -1,182 +1,326 @@
 import React, { useState } from "react";
-import deliveryboy from "../assets/deliveryboy.png";
-import api from "../config/api.config.js";
 import toast from "react-hot-toast";
-
-import { useNavigate } from "react-router-dom";
-
+import { Link, useParams, useNavigate } from "react-router-dom";
+import api from "../config/api.config.js";
+import foodTable from "../assets/foodTable (1).webp";
 
 const Register = () => {
+  const { userType } = useParams(); // Get userType from URL params (if needed)
   const navigate = useNavigate();
-  const [registerData, setRegisterData] = useState({
+  const [formData, setFormData] = useState({
+    userType: userType || "customer",
     fullName: "",
     email: "",
     phone: "",
+    gender: "",
+    dob: "",
     password: "",
     confirmPassword: "",
-    accountType: "customer",
+    agreeTerms: false,
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setRegisterData((prevData) => ({ ...prevData, [name]: value }));
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleUserTypeChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      userType: e.target.value,
+    }));
+  };
+
+  const validateForm = (data) => {
+    const newErrors = {};
+
+    if (!data.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (!data.email.trim()) newErrors.email = "Email is required";
+    if (!data.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!data.gender) newErrors.gender = "Gender is required";
+    if (!data.dob) newErrors.dob = "Date of birth is required";
+    if (!data.password || data.password.length < 6)
+      newErrors.password = "Password must be at least 6 characters";
+    if (!data.confirmPassword)
+      newErrors.confirmPassword = "Please confirm your password";
+    if (data.password !== data.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+    if (!data.agreeTerms)
+      newErrors.agreeTerms = "You must agree to terms and conditions";
+
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setLoading(true);
+    const validationErrors = validateForm(formData);
 
-    console.log("Register data submitted:", registerData);
-    const payload = {
-      fullName: registerData.fullName.trim(),
-      email: registerData.email.toLowerCase(),
-      phone: registerData.phone,
-      password: registerData.password,
-      gender: registerData.gender,
-      dob: registerData.dob,
-    };
-    try {
-      const res = await api.post("/auth/register", payload);
-
-      toast.success(res.data.message);
-      console.log(res.data);
-      
-
-      // console.log(res.data);
-
-      // alert(res.data.message);
-
-      // Optional: Store user data
-      localStorage.setItem("user", JSON.stringify(res.data.data));
-
-      // Redirect after successful login
-      navigate("/");
-    } catch (error) {
-      toast.error(error?.response?.data?.message);
-      console.log(error.response.status + "|" + error?.response?.data?.message);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setLoading(false);
+      return;
     }
-  
+
+    console.log("Form submitted:", formData);
+
+    try {
+      const res = await api.post("/auth/register", {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      });
+      toast.success(res.data.message);
+      navigate("/login");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Unknown error occurred during registration. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-[url('/foodTable.webp')]">
-      <div className="min-h-screen bg-linear-to-br from-black/70 via-black/55 to-orange-500/20">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-2 md:px-8 md:py-12 lg:px-10">
-          <div
-            className="rounded
-          
-          -4xl border border-white/20 bg-white/90 p-6 shadow-2xl backdrop-blur md:p-8 lg:p-10"
-          >
-            <div className="text-center">
-              <div className="mb-3 inline-flex rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-600">
-                Join Cravings
-              </div>
-              <h2 className="text-3xl font-black text-(--accent)">
-                Create Account
-              </h2>
-            </div>
+    <div 
+      className="h-[90vh] flex items-center justify-end bg-cover bg-center p-10 md:pe-30"
+      style={{ backgroundImage: `url(${foodTable})` }}
+    >
+      <div className="bg-white rounded-lg shadow-md px-10 py-6 max-w-md w-full overflow-y-auto max-h-[85vh]">
+        <h1 className="text-3xl font-bold text-(--color-primary) mb-2 text-center">
+          Create Account
+        </h1>
+        <p className="text-(--color-secondary) text-center mb-4">
+          Join us as a Customer, Restaurant, or Rider
+        </p>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <input
-                type="text"
-                id="fullname"
-                name="fullName"
-                value={registerData.fullName}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Enter your full name"
-              />
+        {/* User Type Selection */}
+        <div className="mb-6">
+          <label className="block text-(--color-neutral) font-semibold mb-3">
+            Register as:
+          </label>
+          <div className="flex gap-5">
+            {["customer", "restaurant", "rider"].map((type) => (
+              <label
+                key={type}
+                className="flex items-center gap-2 cursor-pointer text-sm"
+              >
+                <input
+                  type="radio"
+                  name="userType"
+                  value={type}
+                  checked={formData.userType === type}
+                  onChange={handleUserTypeChange}
+                  className="cursor-pointer"
+                />
+                <span className="text-(--color-neutral) capitalize">
+                  {type}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
 
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={registerData.email}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Enter your email"
-              />
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit}>
+          {/* Full Name */}
+          <div className="mb-4">
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              placeholder="Enter your full name"
+              className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                errors.fullName
+                  ? "border-(--color-error) border-2"
+                  : "border-(--color-base-300)"
+              }`}
+            />
+            {errors.fullName && (
+              <span className="text-(--color-error) text-xs mt-1 block">
+                {errors.fullName}
+              </span>
+            )}
+          </div>
 
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={registerData.phone}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Enter your phone number"
-              />
+          {/* Email */}
+          <div className="mb-4">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter your email"
+              className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                errors.email
+                  ? "border-(--color-error) border-2"
+                  : "border-(--color-base-300)"
+              }`}
+            />
+            {errors.email && (
+              <span className="text-(--color-error) text-xs mt-1 block">
+                {errors.email}
+              </span>
+            )}
+          </div>
 
+          {/* Phone */}
+          <div className="mb-4">
+            <input
+              type="number"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Enter your phone number"
+              className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                errors.phone
+                  ? "border-(--color-error) border-2"
+                  : "border-(--color-base-300)"
+              }`}
+            />
+            {errors.phone && (
+              <span className="text-(--color-error) text-xs mt-1 block">
+                {errors.phone}
+              </span>
+            )}
+          </div>
+
+          {/* Gender & Date of Birth */}
+          <div className="mb-4 grid grid-cols-2 gap-4">
+            <div>
               <select
                 name="gender"
-                value={registerData.gender}
-                onChange={handleChange}
+                value={formData.gender}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                  errors.gender
+                    ? "border-(--color-error) border-2"
+                    : "border-(--color-base-300)"
+                }`}
               >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="other">other</option>
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
               </select>
-
+              {errors.gender && (
+                <span className="text-(--color-error) text-xs mt-1 block">
+                  {errors.gender}
+                </span>
+              )}
+            </div>
+            <div>
               <input
                 type="date"
                 name="dob"
-                value={registerData.dob}
-                onChange={handleChange}
+                value={formData.dob}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                  errors.dob
+                    ? "border-(--color-error) border-2"
+                    : "border-(--color-base-300)"
+                }`}
               />
-
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={registerData.password}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Enter your password"
-              />
-
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={registerData.confirmPassword}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Confirm your password"
-              />
-
-              <div className="flex items-center text-sm text-gray-600">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <label htmlFor="terms" className="ml-2">
-                  I agree to the
-                  <span className="ml-1 font-semibold text-orange-500 hover:underline">
-                    terms and conditions.
-                  </span>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full rounded-xl bg-orange-500 px-4 py-3 font-semibold text-white transition hover:bg-orange-600"
-              >
-                Register
-              </button>
-
-              <div className="pt-2 text-center text-sm text-gray-600">
-                <span>Already registered?</span>
-                <a
-                  href="./login"
-                  className="ml-1 font-semibold text-orange-500 hover:underline"
-                >
-                  Login here
-                </a>
-              </div>
-            </form>
+              {errors.dob && (
+                <span className="text-(--color-error) text-xs mt-1 block">
+                  {errors.dob}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+
+          {/* Password */}
+          <div className="mb-4">
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Enter your password"
+              className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                errors.password
+                  ? "border-(--color-error) border-2"
+                  : "border-(--color-base-300)"
+              }`}
+            />
+            {errors.password && (
+              <span className="text-(--color-error) text-xs mt-1 block">
+                {errors.password}
+              </span>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="mb-6">
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              placeholder="Confirm your password"
+              className={`w-full px-3 py-2 border rounded-md text-sm text-(--color-neutral) placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-(--color-primary) ${
+                errors.confirmPassword
+                  ? "border-(--color-error) border-2"
+                  : "border-(--color-base-300)"
+              }`}
+            />
+            {errors.confirmPassword && (
+              <span className="text-(--color-error) text-xs mt-1 block">
+                {errors.confirmPassword}
+              </span>
+            )}
+          </div>
+          <div className="mb-6">
+            <label className="flex items-start gap-2 cursor-pointer text-(--color-secondary)">
+              <input
+                type="checkbox"
+                name="agreeTerms"
+                checked={formData.agreeTerms}
+                onChange={handleInputChange}
+                className="mt-1 cursor-pointer"
+              />
+              <span className="text-sm">
+                I agree to the{" "}
+                <span className="text-(--color-primary) hover:underline font-semibold">
+                  terms and conditions.
+                </span>
+              </span>
+            </label>
+            {errors.agreeTerms && (
+              <span className="text-(--color-error) text-xs mt-1 block ml-7">
+                {errors.agreeTerms}
+              </span>
+            )}
+          </div>
+
+          {/* Register Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-(--color-primary) text-white font-semibold rounded-md hover:bg-orange-700 transition-colors duration-300 mb-4 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </form>
+
+        {/* Login Link */}
+        <p className="text-center text-(--color-secondary) text-sm">
+          Already registered?{" "}
+          <Link
+            to="/login"
+            className="text-(--color-primary) font-semibold hover:underline"
+          >
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );
