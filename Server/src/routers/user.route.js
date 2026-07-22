@@ -1,10 +1,12 @@
 import express from "express";
 import multer from "multer";
-import { EditUserProfile , UpdateUserPassword } from "../controllers/user.controller.js";
+import {
+  EditUserProfile,
+  UpdateUserPassword,
+} from "../controllers/user.controller.js";
 import { AuthProtect } from "../middlewares/auth.middleware.js";
 
 const upload = multer();
-
 
 const router = express.Router();
 
