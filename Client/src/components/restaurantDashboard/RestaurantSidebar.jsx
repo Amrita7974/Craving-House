@@ -8,6 +8,7 @@ const RestaurantSidebar = ({ activeTab, setActiveTab }) => {
   const mainTabs = [
     { name: "Overview", value: "overview", icon: <MdDashboard /> },
     { name: "Orders", value: "orders", icon: <FaShoppingCart /> },
+     { name: "Menu", value: "menu", icon: <MdMenuBook /> },
   ];
 
   const settingsTab = { name: "Settings", value: "settings", icon: <IoMdSettings /> };
