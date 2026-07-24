@@ -4,13 +4,14 @@ import { useAuth } from "../../context/AuthContext";
 import RestaurantSidebar from "../../components/restaurantDashboard/RestaurantSidebar";
 import RestaurantOverview from "../../components/restaurantDashboard/RestaurantOverview";
 import RestaurantSetting from "../../components/restaurantDashboard/RestaurantSetting";
-import RestaurantOrders from "../../components/restaurantDashboard/RestaurantOrder";
+import RestaurantOrder from "../../components/restaurantDashboard/RestaurantOrder";
+import RestaurantMenu from "../../components/restaurantDashboard/RestaurantMenu";
 
 const RestaurantDashboard = () => {
   const { isLogin,role } = useAuth();
   const navigate = useNavigate();
   const active = useLocation().state?.activeTab;
-  const [activeTab, setActiveTab] = React.useState(active || "overview");
+  const [activeTab, setActiveTab] = React.useState(active || "menu");
 
   if (!isLogin || role !== "restaurant") {
     return (
@@ -42,8 +43,9 @@ const RestaurantDashboard = () => {
         </div>
         <div className="w-14/17 bg-(--color-base-100) p-4 rounded-lg shadow-md h-full">
           {activeTab === "overview" && <RestaurantOverview />}
-          {activeTab === "orders" && <RestaurantOrders />}
+          {activeTab === "order" && <RestaurantOrder />}
           {activeTab === "settings" && <RestaurantSetting />}
+          {activeTab === "menu" && <RestaurantMenu />}
         </div>
       </div>
     </>

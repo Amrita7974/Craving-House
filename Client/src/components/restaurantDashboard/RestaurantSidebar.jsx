@@ -1,6 +1,7 @@
 import React from "react";
 import { MdDashboard } from "react-icons/md";
 import { FaShoppingCart } from "react-icons/fa";
+import { MdMenuBook } from "react-icons/md";
 import { MdFavoriteBorder } from "react-icons/md";
 import { IoMdSettings } from "react-icons/io";
 
