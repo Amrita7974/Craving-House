@@ -19,7 +19,6 @@ const RestaurantSetting = () => {
   ];
   const [activeTab, setActiveTab] = useState("information");
 
-  
   const [isLoadingResturantOpen, setIsLoadingResturantOpen] = useState(true);
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(
     () => sessionStorage.getItem("RestaurantOpen") === "true",
@@ -55,6 +54,7 @@ const RestaurantSetting = () => {
         error.response?.data?.message ||
           "Unknown error occurred fetching restaurant. Please try again.",
       );
+
     } finally {
       setIsLoadingRestaurant(false);
       setIsLoadingResturantOpen(false);
@@ -86,6 +86,7 @@ const RestaurantSetting = () => {
       setIsLoadingResturantOpen(false);
     }
   };
+
 
   useEffect(() => {
     if (user?._id) {
