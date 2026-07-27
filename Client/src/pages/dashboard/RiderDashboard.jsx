@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import RiderSidebar from "../../components/riderDashboard/RiderSidebar";
 import RiderOverview from "../../components/riderDashboard/RiderOverview";
-import RiderOrders from "../../components/riderDashboard/RiderOrder";
+import RiderOrder from "../../components/riderDashboard/RiderOrder";
 import RiderSetting from "../../components/riderDashboard/RiderSetting";
 
 
@@ -39,7 +39,7 @@ const RiderDashboard = () => {
         </div>
         <div className="w-14/17 bg-(--color-base-100) p-4 rounded-lg shadow-md h-full">
           {activeTab === "overview" && <RiderOverview />}
-          {activeTab === "orders" && <RiderOrders />}
+          {activeTab === "orders" && <RiderOrder />}
           {activeTab === "settings" && <RiderSetting />}
         </div>
       </div>
