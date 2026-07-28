@@ -1,8 +1,16 @@
 import React from "react";
 import { IoMdCloseCircleOutline } from "react-icons/io";
+import toast from "react-hot-toast";
+import api from "../../../config/api.config";
 
-const ConfirmModal = ({ selectedItem, modalMode, isOpen, onClose }) => {
-  if (!isOpen) return null;
+const modalConfig = {
+  delete: {
+    heading: "Confirm deletion",
+    description: "This will remove the item from your active menu",
+    confirmLabel: "Delete Item",
+    confirmclass: "bg-red-600 hover:bg-red-700 text-white",
+  }
+}
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
@@ -30,6 +38,6 @@ const ConfirmModal = ({ selectedItem, modalMode, isOpen, onClose }) => {
       </div>
     </>
   );
-};
+
 
 export default ConfirmModal;
