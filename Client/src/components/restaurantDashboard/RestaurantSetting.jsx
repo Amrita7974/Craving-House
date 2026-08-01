@@ -8,7 +8,7 @@ import { RiLoader4Fill } from "react-icons/ri";
 import CoreDetails from "./settings/coreDetails/Index";
 import RestaurantPhotos from "./settings/RestaurantPhotos";
 import Loader from "../../components/Loader";
-import { IoMdHammer } from "react-icons/io";
+
 
 const RestaurantSetting = () => {
    const { user } = useAuth();
@@ -66,7 +66,7 @@ const RestaurantSetting = () => {
       setIsLoadingResturantOpen(true);
 
       const res = await api.patch(
-        `/restaurant/change-open-status/${!isRestaurantOpen}?id=${user._id}`,
+        `/restaurant/change-open-status/${!isRestaurantOpen}`
       );
       setIsRestaurantOpen(res.data.data.isOpen);
       setRestaurantData(res.data.data);

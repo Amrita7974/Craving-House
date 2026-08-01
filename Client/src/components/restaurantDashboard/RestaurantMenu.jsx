@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { FaAward, FaRegGrinStars } from "react-icons/fa";
 import { BiSolidDish } from "react-icons/bi";
 import { LuPencilLine, LuTrash2, LuEye, LuChevronDown } from "react-icons/lu";
@@ -6,7 +6,8 @@ import { AiTwotoneLike } from "react-icons/ai";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import ConfirmModal from "./menuItems/ConfirmModal";
 import AddNewItemModal from "./menuItems/AddNewItemModal";
-import api from "../../config/api.config";
+import EditOrViewItem from "./menuItems/EditOrViewItem";
+import api from "../../config/api.config.js";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
 
@@ -47,22 +48,32 @@ const RestaurantMenu = () => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    if (
-      isAddNewItemModalOpen ||
-      isEditViewItemModalOpen ||
-      isControlsModalOpen
-    ) {
-      return; // Skip fetching if any modal is open
-    }
-    fetchMenuItems();
-  }, [isAddNewItemModalOpen, isEditViewItemModalOpen, isControlsModalOpen]);
 
-  console.log(menuItems);
+  useEffect(() => {
+    queueMicrotask(() => {
+      fetchMenuItems();
+    });
+  }, []);
+
+  const handleStatusChange = async (itemId, status) => {
+    try {
+      const response = await api.patch(
+        `/restaurant/menu-item/${itemId}/status?status=${encodeURIComponent(status)}`,
+      );
+      toast.success(response.data.message || "Item status updated");
+      await fetchMenuItems();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Unable to update item status. Please try again.",
+      );
+    }
+  };
 
   if (isLoading) {
     return <Loader height="100%" width="100%" />;
   }
+
 
   return (
     <>
@@ -129,7 +140,7 @@ const RestaurantMenu = () => {
                         statusChipStyles[item.status]
                       }`}
                       onChange={(e) => {
-                        // Handle status change logic here
+                        handleStatusChange(item._id, e.target.value);
                       }}
                     >
                       <option value="available">
@@ -232,6 +243,7 @@ const RestaurantMenu = () => {
                 </div>
               </div>
             ))}
+            
           </div>
         </div>
       </div>
@@ -242,6 +254,7 @@ const RestaurantMenu = () => {
           modalMode={modalMode}
           isOpen={isControlsModalOpen}
           onClose={() => setIsControlsModalOpen(false)}
+            onActionSuccess={fetchMenuItems}
         />
       )}
 
@@ -249,11 +262,20 @@ const RestaurantMenu = () => {
         <AddNewItemModal
           isOpen={isAddNewItemModalOpen}
           onClose={() => setIsAddNewItemModalOpen(false)}
+            onActionSuccess={fetchMenuItems}
+        />
+      )}
+       {isEditViewItemModalOpen && (
+        <EditOrViewItem
+          selectedItem={selectedItem}
+          modalMode={modalMode}
+          isOpen={isEditViewItemModalOpen}
+          onClose={() => setIsEditViewItemModalOpen(false)}
+          onActionSuccess={fetchMenuItems}
         />
       )}
     </>
   );
 };
-
 
 export default RestaurantMenu;
