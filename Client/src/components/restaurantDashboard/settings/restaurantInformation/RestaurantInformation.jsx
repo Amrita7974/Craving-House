@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 
 const RestaurantInformation = () => {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
 
   // Common State variables
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +50,7 @@ const RestaurantInformation = () => {
    
   
       const res = await api.put(
-        `/restaurant/update-restaurant-info`,
+       "/restaurant/update-restaurant-info",
         restaurantFormData,
       );
       setRestaurantData(res.data.data);
