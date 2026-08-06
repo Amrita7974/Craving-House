@@ -39,7 +39,7 @@ const foodTypes = [
   "Other",
 ];
 
-const AddNewItemModal = ({ isOpen, onclose}) => {
+const AddNewItemModal = ({ isOpen, onClose}) => {
   const [newItemFormData, setNewItemFormData] = React.useState({
     itemName: "",
     description: "",
