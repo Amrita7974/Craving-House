@@ -1,12 +1,16 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AiOutlineLogout } from "react-icons/ai";
+import { useCart } from "../context/CartContext";
+import logoLight from "../assets/transparentLogoLight.png";
+import { FaPowerOff } from "react-icons/fa";
+import { IoCartOutline } from "react-icons/io5";
 import api from "../config/api.config.js";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
   const { user, setUser,role, isLogin, setIsLogin,setRole } = useAuth();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
 
 
@@ -28,72 +32,89 @@ const Navbar = () => {
     try {
       const res = await api.get("/auth/logout");
       toast.success(res.data.message);
+
       sessionStorage.removeItem("cravingUser");
       setIsLogin(false);
       setUser(null); 
+       setRole(null);
       navigate("/");
       
     } catch (error) {
       toast.error(
-        error.response?.status + " | " + error.response?.data?.message ||
-          error.message,
+       error.response?.data?.message ||
+          "Unknown error occurred during registration. Please try again.",
       );
     }
+    
   };
 
   return (
-    <>
-      <div className='bg-(--secondary) text-(--primary-text) p-3 h-14 flex justify-between items-center'>
-        <div className="font-bold text-lg">Cravings</div>
-        
-        <div className="flex gap-4 items-center">
-          <Link to={"/"} className='hover:underline'>
-            Home
+     <>
+      <div className="sticky top-0 z-90 flex items-center justify-between px-12 py-1 bg-(--color-primary) text-white w-full h-14 shadow-md">
+        <div className="h-full">
+          <Link to="/">
+            <img src={logoLight} alt="Logo" className="w-fit h-full" />{" "}
           </Link>
-          
-          <Link to={"/Contactus"} className='hover:underline'>
-            ContactUs
-          </Link>
-
-          {isLogin && user ? (
-            <div className="border-s-2 flex justify-center items-center gap-4 px-4">
-              <div className="w-8 h-8 rounded-full overflow-hidden border">
-                <img
-                  src={user?.photo?.url || user?.photo} // Checks for nested object or direct string URL
-                  alt={user?.fullName || "User profile"}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <Link
-                to={"/user/dashboard"}
-                className="hover:underline hover:text-(--accent)"
-              >
-                {user?.fullName}
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-red-300 hover:text-red-600 text-xl"
-                title="Logout"
-              >
-                <AiOutlineLogout />
-              </button>
-            </div>
-          ) : (
-            <>
-              <Link
-                to={"/login"}
-                className="hover:underline hover:text-(--accent)"
-              >
-                Login
-              </Link>
-              <Link to={"/register"} className="hover:underline">
-                Register
-              </Link>
-            </>
-          )}
         </div>
-      </div>
 
+        {isLogin ? (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 relative">
+              <button
+                onClick={() => navigate("/cart")}
+                className="hover:scale-110 transition-transform duration-200"
+                title="Go to Cart"
+              >
+                <IoCartOutline className="text-(--color-primary-content) text-3xl" />
+              </button>
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-(--color-error) text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </div>
+            <button
+              className="flex gap-2 items-center text-(--color-primary-content) border border-transparent hover:border-(--color-primary-content)  px-3 py-1 rounded"
+              title="Go to Dashboard"
+              onClick={handleNavigate}
+            >
+              <img
+                src={user?.photo.url}
+                alt={user?.fullName}
+                className="w-12 h-12 rounded-full object-cover object-top"
+              />
+              <div className="flex flex-col items-start">
+                <span className="text-base">{user?.fullName}</span>
+                <span className="text-xs text-(--color-primary-content)/80 uppercase">
+                  {role}
+                </span>
+              </div>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-(--color-primary-content) border border-transparent hover:border-(--color-primary-content) hover:bg-(--color-error) px-3 py-3 rounded"
+              title="Logout"
+            >
+              <FaPowerOff />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Link
+              to="/login"
+              className="text-(--color-primary-content) border border-transparent hover:border-(--color-primary-content) px-3 py-1 rounded"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register/customer"
+              className="bg-(--color-primary-content) text-(--color-primary) hover:bg-(--color-primary) hover:text-(--color-primary-content) border px-3 py-1 rounded"
+            >
+              Register
+            </Link>
+          </div>
+        )}
+      </div>
     </>
   );
 };
