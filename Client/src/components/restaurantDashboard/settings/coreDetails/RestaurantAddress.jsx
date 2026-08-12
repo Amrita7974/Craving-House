@@ -51,15 +51,36 @@ const RestaurantAddress = () => {
     }
   };
 
-  const handleSaveRestaurantAddress = () => {
-    // Implement save logic here, e.g., API call to save the address
-    setEditingRestaurantAddress(false);
+  const handleSaveRestaurantAddress = async () => {
+    try {
+      setIsLoading(true);
+      const res = await api.put("/restaurant/update-address", restaurantAddressFormData);
+      setRestaurantData(res.data.data);
+      sessionStorage.setItem("cravingRestaurant", JSON.stringify(res.data.data));
+      toast.success(res.data.message);
+      setEditingRestaurantAddress(false);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update address. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancelRestaurantAddress = () => {
+    setRestaurantAddressFormData({
+      address: restaurantData?.address || "",
+      city: restaurantData?.city || "",
+      state: restaurantData?.state || "",
+      pinCode: restaurantData?.pinCode || "",
+      country: restaurantData?.country || "",
+      geoLat: restaurantData?.geoLocation?.lat || "",
+      geoLon: restaurantData?.geoLocation?.lon || "",
+    });
     setEditingRestaurantAddress(false);
-    // Optionally reset the form data to the original values if needed
   };
+
 
   return (
     <>
