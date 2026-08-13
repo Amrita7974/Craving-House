@@ -38,12 +38,12 @@ const Home = () => {
         const response = await api.get("/public/restaurants");
 
         // Map API response to match component's expected format
-        const formattedRestaurants = response.data.data.map((restaurant) => ({
+        const formattedRestaurants = (response.data.data || []).map((restaurant) => ({
           id: restaurant._id,
-          name: restaurant.restaurantName,
+          name: restaurant.restaurantName || "",
           description:
             restaurant.description ||
-            `${restaurant.cuisineTypes?.join(", ")} cuisine in ${restaurant.city}`,
+            `${restaurant.cuisineTypes?.join(", ") || ""} cuisine in ${restaurant.city || ""}`,
           rating: restaurant.averageRating || 0,
           numReviews: restaurant.numReviews || 0,
           image:
@@ -51,6 +51,7 @@ const Home = () => {
             restaurant.restaurantImage?.[0]?.url ||
             "https://placehold.co/300x200?text=Restaurant",
           cuisines: restaurant.cuisineTypes || [],
+          restaurantType: restaurant.restaurantType || "",
           geolocation: restaurant.geoLocation,
           city: restaurant.city || "",
           address: restaurant.address || "",
@@ -81,26 +82,30 @@ const Home = () => {
     if (searchQuery) {
       filtered = filtered.filter(
         (r) =>
-          r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.cuisines.some((c) =>
-            c.toLowerCase().includes(searchQuery.toLowerCase()),
+          r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.cuisines?.some((c) =>
+            c?.toLowerCase().includes(searchQuery.toLowerCase()),
           ) ||
-          r.city.toLowerCase().includes(searchQuery.toLowerCase()),
+          r.city?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
-    // Filter by category (map to cuisine types)
+    // Filter by category (map to cuisine types and restaurant types)
     if (selectedCategory !== "all") {
       const categoryMap = {
-        veg: "vegetarian",
-        nonveg: "non-vegetarian",
-        dessert: "desserts",
-        others: "other",
+        veg: ["vegetarian", "veg"],
+        nonveg: ["non-vegetarian", "non-veg", "nonveg"],
+        dessert: ["desserts", "dessert"],
+        others: ["other", "others"],
       };
 
-      const selectedCuisine = categoryMap[selectedCategory];
+      const matchTerms = categoryMap[selectedCategory] || [selectedCategory];
       filtered = filtered.filter((r) =>
-        r.cuisines.some((c) => c.toLowerCase().includes(selectedCuisine)),
+        matchTerms.some(
+          (term) =>
+            r.restaurantType?.toLowerCase().includes(term) ||
+            r.cuisines?.some((c) => c?.toLowerCase().includes(term)),
+        ),
       );
     }
 
@@ -194,7 +199,7 @@ const Home = () => {
               {filteredRestaurants.map((restaurant) => (
                 <div
                   key={restaurant.id}
-                  onClick={() => navigate(`/restaurant-menu/${restaurant.id}`)}
+                  onClick={() => navigate(`/restaurant-details/${restaurant.id}`)}
                   className="flex flex-col bg-(--color-base-100) rounded-xl overflow-hidden shadow-md hover:shadow-xl transition cursor-pointer transform hover:scale-105"
                 >
                   {/* Restaurant Image */}
@@ -236,7 +241,7 @@ const Home = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/restaurant-menu/${restaurant.id}`);
+                          navigate(`/restaurant-details/${restaurant.id}`);
                         }}
                         className="w-full bg-(--color-primary) text-(--color-primary-content) px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition"
                       >
