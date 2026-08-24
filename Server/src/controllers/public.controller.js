@@ -1,4 +1,6 @@
 import Contact from "../models/contact.model.js";
+import Restaurant from "../models/restaurant.model.js";
+import Menu from "../models/menu.model.js";
 
 export const ContactUsForm = async (req, res, next) => {
   try {
@@ -24,7 +26,7 @@ export const ContactUsForm = async (req, res, next) => {
       });
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 };
 
@@ -34,7 +36,7 @@ export const GetAllRestaurants = async (req, res, next) => {
     res.status(200).json({ data: restaurants });
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 };
 
@@ -47,7 +49,7 @@ export const GetRestaurantDetails = async (req, res, next) => {
       populate: {
         path: "managerId",
       },
-    })
+    });
 
     if (!restaurantDetails) {
       const error = new Error("Restaurant not found");
@@ -58,6 +60,6 @@ export const GetRestaurantDetails = async (req, res, next) => {
     res.status(200).json({ data: restaurantDetails });
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 };

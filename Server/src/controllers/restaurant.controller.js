@@ -22,7 +22,7 @@ export const RestaurantGetData = async (req, res, next) => {
       return next(error);
     }
 
-    const restaurantData = await Restaurant.find({ managerId });
+    const restaurantData = await Restaurant.findOne({ managerId });
 
     if (restaurantData) {
       res.status(200).json({
@@ -36,8 +36,8 @@ export const RestaurantGetData = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.log(error.message);
-    next();
+    console.log("RestaurantAddMenuItem error:", error);
+    next(error);
   }
 };
 
@@ -122,7 +122,7 @@ export const RestaurantUpdateProfile = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 };
 
@@ -198,7 +198,7 @@ export const RestaurantUpdateInfo = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 };
 
@@ -230,7 +230,7 @@ export const OpenRestaurant = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 };
 
@@ -269,7 +269,7 @@ export const RestaurantUpdateLegalInfo = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error.message);
-    next();
+    next(error);
   }
 
 };
@@ -619,6 +619,202 @@ export const RestaurantDeleteMenuItem = async (req, res, next) => {
     return res.status(200).json({
       message: "Menu item deleted successfully",
       data: menuItem,
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const RestaurantUpdateAddress = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const { address, city, state, pinCode, country, geoLat, geoLon } = req.body;
+
+    const existingRestaurant = await Restaurant.findOne({
+      managerId: currentUser._id,
+    });
+
+    if (!existingRestaurant) {
+      const error = new Error("Restaurant Not Found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    existingRestaurant.address = address ?? existingRestaurant.address;
+    existingRestaurant.city = city ?? existingRestaurant.city;
+    existingRestaurant.state = state ?? existingRestaurant.state;
+    existingRestaurant.pinCode = pinCode ?? existingRestaurant.pinCode;
+    existingRestaurant.country = country ?? existingRestaurant.country;
+    if (geoLat && geoLon) {
+      existingRestaurant.geoLocation = {
+        lat: String(geoLat),
+        lon: String(geoLon),
+      };
+    }
+
+    await existingRestaurant.save();
+    return res.status(200).json({
+      message: "Address updated successfully",
+      data: existingRestaurant,
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const RestaurantUpdateBankingDocuments = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const { bankName, accountNumber, ifscCode, panCard, gst, fssai } = req.body;
+
+    const existingRestaurant = await Restaurant.findOne({
+      managerId: currentUser._id,
+    });
+
+    if (!existingRestaurant) {
+      const error = new Error("Restaurant Not Found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    existingRestaurant.financialDetails = {
+      bankName: bankName ?? existingRestaurant.financialDetails?.bankName ?? "",
+      accountNumber:
+        accountNumber ??
+        existingRestaurant.financialDetails?.accountNumber ??
+        "",
+      ifscCode: ifscCode ?? existingRestaurant.financialDetails?.ifscCode ?? "",
+    };
+    existingRestaurant.documents = {
+      panCard: panCard ?? existingRestaurant.documents?.panCard ?? "",
+      gstCertificate: gst ?? existingRestaurant.documents?.gstCertificate ?? "",
+      fssaiCertificate:
+        fssai ?? existingRestaurant.documents?.fssaiCertificate ?? "",
+    };
+
+    await existingRestaurant.save();
+    return res.status(200).json({
+      message: "Banking & Documents updated successfully",
+      data: existingRestaurant,
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const RestaurantUpdateSocialMediaLinks = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const { socialMediaLinks } = req.body;
+
+    if (!Array.isArray(socialMediaLinks)) {
+      const error = new Error("socialMediaLinks must be an array");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const existingRestaurant = await Restaurant.findOne({
+      managerId: currentUser._id,
+    });
+
+    if (!existingRestaurant) {
+      const error = new Error("Restaurant Not Found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    existingRestaurant.socialMediaLinks = socialMediaLinks;
+    await existingRestaurant.save();
+    return res.status(200).json({
+      message: "Social media links updated successfully",
+      data: existingRestaurant,
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const RestaurantUpdateCoverPhoto = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const coverImageFromFE = req.file;
+
+    if (!coverImageFromFE) {
+      const error = new Error("Cover image is required");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const existingRestaurant = await Restaurant.findOne({
+      managerId: currentUser._id,
+    });
+
+    if (!existingRestaurant) {
+      const error = new Error("Restaurant Not Found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    if (existingRestaurant.coverImage?.publicId) {
+      await deleteSingleImage(existingRestaurant.coverImage);
+    }
+
+    const coverImage = await uploadSingleImage(
+      coverImageFromFE,
+      `restaurant/${currentUser.phone}/coverPhoto`,
+    );
+    existingRestaurant.coverImage = coverImage;
+
+    await existingRestaurant.save();
+    return res.status(200).json({
+      message: "Cover photo updated successfully",
+      data: existingRestaurant,
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const RestaurantUpdateRestaurantImages = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const restaurantImagesFromFE = req.files;
+
+    if (!restaurantImagesFromFE || restaurantImagesFromFE.length === 0) {
+      const error = new Error("At least one restaurant image is required");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const existingRestaurant = await Restaurant.findOne({
+      managerId: currentUser._id,
+    });
+
+    if (!existingRestaurant) {
+      const error = new Error("Restaurant Not Found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    if (existingRestaurant.restaurantImage?.length > 0) {
+      await deleteMultipleImages(existingRestaurant.restaurantImage);
+    }
+
+    const restaurantImages = await uploadMultipleImages(
+      restaurantImagesFromFE,
+      `restaurant/${currentUser.phone}/restaurantPhotos`,
+    );
+    existingRestaurant.restaurantImage = restaurantImages;
+
+    await existingRestaurant.save();
+    return res.status(200).json({
+      message: "Restaurant images updated successfully",
+      data: existingRestaurant,
     });
   } catch (error) {
     console.log(error.message);
