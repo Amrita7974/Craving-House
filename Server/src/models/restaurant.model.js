@@ -25,37 +25,35 @@ const RestaurantSchema = mongoose.Schema(
     },
     legal: {
       type: {
-        legalName: { type: String, required: true },
-        companyType: { type: String, required: true },
+        legalName: { type: String,  required: true },
+        companyType: { type: String,  required: true  },
       },
     },
 
     documents: {
       type: {
-       
-        
-        gstCertificate: { type: String, required: true },
-        fssaiCertificate: { type: String, required: true },
-        panCard: { type: String, required: true },
+        gstCertificate: { type: String,  required: true  },
+        fssaiCertificate: { type: String, required: true  },
+        panCard: { type: String,  required: true },
       },
     },
     financialDetails: {
       type: {
-        bankName: { type: String, required: true },
-        accountNumber: { type: String, required: true },
-        ifscCode: { type: String, required: true },
+        bankName: { type: String,  required: true  },
+        accountNumber: { type: String,  required: true  },
+        ifscCode: { type: String,  required: true },
       },
     },
     contactDetails: {
       type: {
-        email: { type: String, required: true },
-        phone: { type: String, required: true },
+        email: { type: String,  required: true  },
+        phone: { type: String,  required: true  },
       },
     },
     servingHours: {
       type: {
-        openingTime: { type: String, required: true },
-        closingTime: { type: String, required: true },
+        openingTime: { type: String,  required: true  },
+        closingTime: { type: String,  required: true  },
       },
     },
     isOpen: { type: Boolean, default: false },
@@ -67,35 +65,33 @@ const RestaurantSchema = mongoose.Schema(
     averageRating: { type: Number, default: 0 },
     cuisineTypes: {
       type: [String],
-      required: true,
+      default: [],
     },
     restaurantImage: {
       type: [
         {
-          url: { type: String, required: true },
-          publicId: { type: String, required: true },
+          url: { type: String,  required: true  },
+          publicId: { type: String,  required: true  },
         },
       ],
-      required: true,
+      default: [],
     },
     coverImage: {
       type: {
-        url: { type: String, required: true },
-        publicId: { type: String, required: true },
+        url: { type: String,  required: true  },
+        publicId: { type: String,  required: true  },
       },
-      required: true,
     },
-    description: { type: String, required: true },
+    description: { type: String,  required: true  },
     restaurantType: {
       type: String,
       enum: ["veg", "non-veg", "jain", "vegan", "both"],
-      required: true,
     },
     socialMediaLinks: {
       type: [
         {
-          platform: { type: String, required: true },
-          url: { type: String, required: true },
+          platform: { type: String, required: true   },
+          url: { type: String, required: true  },
         },
       ],
     },

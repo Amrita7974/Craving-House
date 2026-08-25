@@ -24,6 +24,7 @@ const CustomerSchema = mongoose.Schema(
           isDefault: { type: Boolean, default: false },
           geoLocation: {
             type: {
+            
               lat: {
                 type: String,
               },
