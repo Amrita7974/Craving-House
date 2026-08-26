@@ -37,48 +37,30 @@ const UserData = [
 const userSeed = async () => {
   try {
     //Seeding Restaurant
-    const existingRestaurant = await User.findOne({ email: UserData[0].email });
+    const preparedUserData = await Promise.all(
+      UserData.map(async (user) => {
+        const { rawPassword, ...userPayload } = user;
 
-    if (existingRestaurant) {
-      console.log("Existing Resturant Found");
-      console.log("Deleting Existing Resturant");
-      await existingRestaurant.deleteOne();
+        return {
+          ...userPayload,
+          password: await bcrypt.hash(rawPassword, 10),
+        };
+      }),
+    );
+
+    for (const user of preparedUserData) {
+      const existingUser = await User.findOne({ email: user.email });
+
+      if (existingUser) {
+        console.log(`Existing ${user.userType} Found (${user.email})`);
+        console.log(`Deleting Existing ${user.userType} (${user.email})`);
+        await existingUser.deleteOne();
+      }
+
+      console.log(`Creating New ${user.userType} (${user.email})`);
+      await User.create(user);
+      console.log(`${user.userType} Created Successfully (${user.email})`);
     }
-
-    console.log("Creating New Restaurant");
-
-    const newRestaurant = await User.create(UserData[0]);
-    console.log("Restaurant Created Sucessfully");
-
-    //Seeding Customer
-
-    const existingCustomer = await User.findOne({ email: UserData[1].email });
-
-    if (existingCustomer) {
-      console.log("Existing Customer Found");
-      console.log("Deleting Existing Customer");
-      await existingCustomer.deleteOne();
-    }
-
-    console.log("Creating New Customer");
-
-    const newCustomer = await User.create(UserData[1]);
-    console.log("Customer Created Sucessfully");
-
-    // Seeding Rider
-
-    const existingRider = await User.findOne({ email: UserData[2].email });
-
-    if (existingRider) {
-      console.log("Existing Rider Found");
-      console.log("Deleting Existing Rider");
-      await existingRider.deleteOne();
-    }
-
-    console.log("Creating New Rider");
-
-    const newRider = await User.create(UserData[2]);
-    console.log("Rider Created Sucessfully");
   } catch (error) {
     console.log("User Not Created");
     throw error;
