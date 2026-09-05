@@ -59,6 +59,12 @@ export const uploadSingleImage = async (image, storageLocation) => {
       crop: "fill",
     });
 
+    
+    console.log("Image uploaded to Cloudinary:", {
+      url: result.secure_url,
+      publicId: result.public_id,
+    });
+
     return {
       url: result.secure_url,
       publicId: result.public_id,

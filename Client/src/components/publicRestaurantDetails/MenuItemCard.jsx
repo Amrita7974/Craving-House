@@ -8,8 +8,10 @@ import {
 
 import { foodTypeDot } from "./helpers";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 
 const MenuItemCard = ({ item, restaurantId, restaurantName }) => {
+  const { isLogin, user, role } = useAuth();
   const { addItem, increaseItem, decreaseItem, getItemQuantity, replaceCart } =
     useCart();
   const [showConflictModal, setShowConflictModal] = useState(false);
@@ -18,7 +20,13 @@ const MenuItemCard = ({ item, restaurantId, restaurantName }) => {
   const itemCount = getItemQuantity(item._id);
 
   const handleAdd = () => {
-    if (isUnavailable) return;
+   if (!isLogin || !user || role !== "customer") {
+      toast.error("Please log as Customer to add items to your cart.");
+      return;
+    }
+  
+
+   if (isUnavailable) return;
     const result = addItem(item, restaurantId, restaurantName);
     if (result === "different_restaurant") {
       setShowConflictModal(true);

@@ -1,6 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import Loader from "../Loader";
+import api from "../../config/api.config.js";
+import toast from "react-hot-toast";
+const CustomerOrders = () => {
+  const [orders, setOrders] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
-const CustomerOrder = () => {
+  const fetchAllOrders = async () => {
+    try {
+      setIsLoading(true);
+      const res = await api.get("/customer/all-orders");
+      // console.log("Fetched orders:", res.data); // Log the fetched orders for debugging
+      setOrders(res.data.data);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Unknown error occurred during fetching orders. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllOrders();
+  }, []);
+
+  if (isLoading) {
+    return <Loader height="100%" width="100%" />;
+  }
+
   return (
     <div className="overflow-y-auto h-full">
       <h2 className="text-2xl font-bold mb-6">My Orders</h2>
@@ -28,4 +57,4 @@ const CustomerOrder = () => {
   );
 };
 
-export default CustomerOrder;
+export default CustomerOrders;

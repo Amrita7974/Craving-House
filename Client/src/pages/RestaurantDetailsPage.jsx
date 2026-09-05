@@ -12,9 +12,10 @@ import RestaurantGallery from "../components/publicRestaurantDetails/RestaurantG
 import RestaurantContact from "../components/publicRestaurantDetails/RestaurantContact";
 import RestaurantSocialLinks from "../components/publicRestaurantDetails/RestaurantSocialLinks";
 import RestaurantMenu from "../components/publicRestaurantDetails/RestaurantMenu";
-
+import { useCart } from "../context/CartContext";
 
 const RestaurantDetailsPage = () => {
+   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { restaurantId } = useParams();
 const navigate = useNavigate();
 
@@ -73,8 +74,31 @@ const navigate = useNavigate();
         </div>
 
         {/* Right: Menu */}
-        <RestaurantMenu menuItems={details.menuItems} restaurantId={restaurant._id} restaurantName={restaurant.restaurantName} />
+         <RestaurantMenu
+          menuItems={details.menuItems}
+          restaurantId={restaurant._id}
+          restaurantName={restaurant.restaurantName}
+        />
       </div>
+
+      {cart && totalItems > 0 && (
+        <div className="fixed w-full bottom-5 flex items-center justify-center">
+          <div className=" border bg-(--color-primary) text-(--color-primary-content) ps-4 pe-2 py-2 rounded-full w-4xl flex justify-between items-center">
+            <div>Total items : {totalItems}</div>
+
+            <div className="flex items-center gap-2">
+              <div>Total Amount : {totalPrice}</div>
+              <span>|</span>
+              <button
+                className="bg-(--color-primary-content) text-(--color-primary) p-2 rounded-full"
+                onClick={() => navigate("/cart")}
+              >
+                Proceed to checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
