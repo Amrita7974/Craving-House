@@ -1,4 +1,4 @@
-import dotenv from "dotenv"; 
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -23,7 +23,7 @@ import cloudinary from "./src/config/cloudinary.config.js";
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
 app.use(cookieParser());
 
 app.use(express.json());
@@ -60,13 +60,13 @@ app.listen(port, async () => {
   connectDB();
 
 
-try {
-  const result = await cloudinary.api.ping();
-  console.log("Cloudinary Connected :");
-  console.log(result);
-} catch (error) {
-  console.log(error.message);
-  process.exit(1);
-}
+  try {
+    const result = await cloudinary.api.ping();
+    console.log("Cloudinary Connected :");
+    console.log(result);
+  } catch (error) {
+    console.log(error.message);
+    process.exit(1);
+  }
 
 });
